@@ -1,13 +1,19 @@
 {
-  "name": "venom_bot_with_whatsapp_for_ChatGPT",
+  "name": "whatsgpt",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server",
-    "start": "node server"
+    "server": "node server",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "openai": "^3.2.1",
+    "venom-bot": "^4.3.7"
+  }
 }
