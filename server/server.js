@@ -1,50 +1,33 @@
-import express from 'express'
-import * as dotenv from 'dotenv'
-import cors from 'cors'
-import { Configuration, OpenAIApi } from 'openai'
+const venom = require('venom-bot');
+const { response } = require("./chatgpt");
 
-dotenv.config()
-// console.log(process.env.OPENAI_API_KEY);
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
-
-const app = express()
-app.use(cors())
-app.use(express.json())
-
-app.get('/', async (req, res) => {
-  res.status(200).send({
-    message: 'Hello from CodeX!'
+venom
+  .create({
+    session: 'session-name', //name of session
+    multidevice: true // for version not multidevice use false.(default: true)
   })
-})
+  .then((client) => start(client))
+  .catch((erro) => {
+    console.log(erro);
+  });
 
-app.post('/', async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
-    console.log(prompt);
-
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: prompt,
-      temperature: 0.9,
-      max_tokens: 200,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0.6
-    });
-    res.status(200).send({
-      bot: response.data.choices[0].text
-    });
-
-  } catch (error) {
-    console.error(error)
-    res.status(500).send(error || 'Something went wrong');
-  }
-})
-
-const PORT = process.env.PORT || 5000;
-app.listen(5000, () => console.log(`AI server started on port ${PORT}`));
+function start(client) {
+  client.onMessage((message) => {
+// This ignore messages from group and story 
+    if (message.body && message.isGroupMsg === false && message.from !== 'status@broadcast') {
+        response(message.body).then(data => {
+            console.log(data.data.choices[0]);
+            client
+            .sendText(message.from, data.data.choices[0].text)
+            .then((result) => {
+              console.log('Result: ', result); //return object success
+            })
+            .catch((erro) => {
+              console.error('Error when sending: ', erro); //return object error
+            });
+          }).catch(err =>{
+            console.log(err);
+          })
+    }
+  });
+}
